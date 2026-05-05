@@ -109,6 +109,7 @@
 		AA00000000000000000046 /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000046 /* AdvancedSettingsView.swift */; };
 		AA00000000000000000050 /* SubtitleExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000050 /* SubtitleExporter.swift */; };
 		AA00000000000000000051 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000051 /* GeneralSettingsView.swift */; };
+		A40800000000000000000001 /* LanguageSelectionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40800000000000000000001 /* LanguageSelectionEditor.swift */; };
 		AA00000000000000000052 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000052 /* Localizable.xcstrings */; };
 		AA00000000000000000060 /* TranscriptionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000060 /* TranscriptionRecord.swift */; };
 		AA00000000000000000061 /* HistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000061 /* HistoryService.swift */; };
@@ -473,6 +474,7 @@
 		BB00000000000000000046 /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		BB00000000000000000050 /* SubtitleExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleExporter.swift; sourceTree = "<group>"; };
 		BB00000000000000000051 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		B40800000000000000000001 /* LanguageSelectionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionEditor.swift; sourceTree = "<group>"; };
 		BB00000000000000000052 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		BB00000000000000000060 /* TranscriptionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionRecord.swift; sourceTree = "<group>"; };
 		BB00000000000000000061 /* HistoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryService.swift; sourceTree = "<group>"; };
@@ -1284,6 +1286,7 @@
 				BB00000000000000000359 /* WorkflowsSettingsView.swift */,
 				BB00000000000000000046 /* AdvancedSettingsView.swift */,
 				BB00000000000000000051 /* GeneralSettingsView.swift */,
+				B40800000000000000000001 /* LanguageSelectionEditor.swift */,
 				BB00000000000000000064 /* HistoryView.swift */,
 				BB00000000000000000068 /* ProfilesSettingsView.swift */,
 				BB00000000000000000075 /* TranslationHostWindow.swift */,
@@ -3169,6 +3172,7 @@
 				AA00000000000000000283 /* DictionaryExporter.swift in Sources */,
 				AA00000000000000000284 /* TermPackRegistryService.swift in Sources */,
 				AA00000000000000000051 /* GeneralSettingsView.swift in Sources */,
+				A40800000000000000000001 /* LanguageSelectionEditor.swift in Sources */,
 				AA00000000000000000060 /* TranscriptionRecord.swift in Sources */,
 				AA00000000000000000061 /* HistoryService.swift in Sources */,
 				AA00000000000000000062 /* TextDiffService.swift in Sources */,

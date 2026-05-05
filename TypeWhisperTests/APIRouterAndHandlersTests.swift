@@ -2179,12 +2179,13 @@ final class APIRouterAndHandlersTests: XCTestCase {
         XCTAssertNotEqual(localizedAppLanguageName(for: "zh-Hans"), localizedAppLanguageName(for: "zh-Hant"))
     }
 
-    func testLocalizedAppLanguageFlagUsesDefaultsAndRegionOverrides() {
-        XCTAssertEqual(localizedAppLanguageFlag(for: "en"), "🇺🇸")
-        XCTAssertEqual(localizedAppLanguageFlag(for: "en-GB"), "🇬🇧")
-        XCTAssertEqual(localizedAppLanguageFlag(for: "en-US"), "🇺🇸")
-        XCTAssertEqual(localizedAppLanguageFlag(for: "zh"), "🇨🇳")
-        XCTAssertNil(localizedAppLanguageFlag(for: "zh-Hans"))
+    func testLocalizedAppLanguageBadgeDescriptorUsesNeutralLanguageCodes() {
+        XCTAssertEqual(localizedAppLanguageBadgeDescriptor(for: "en").text, "EN")
+        XCTAssertEqual(localizedAppLanguageBadgeDescriptor(for: "de").text, "DE")
+        XCTAssertEqual(localizedAppLanguageBadgeDescriptor(for: "en-GB").text, "EN-GB")
+        XCTAssertEqual(localizedAppLanguageBadgeDescriptor(for: "zh-Hans").text, "ZH-HANS")
+        XCTAssertEqual(localizedAppLanguageBadgeDescriptor(for: "multi").text, "MULTI")
+        XCTAssertEqual(localizedAppLanguageBadgeDescriptor(for: "en").accessibilityLabel, localizedAppLanguageName(for: "en"))
     }
 
     func testFeaturedAppLanguageRankPromotesCommonLanguages() {
