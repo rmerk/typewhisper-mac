@@ -202,6 +202,69 @@ final class Gemma4PluginModelPolicyTests: XCTestCase {
         )
     }
 
+    func testGemma4MissingWeightErrorsUseCacheRecoveryMessage() throws {
+        let model = try XCTUnwrap(Gemma4Plugin.modelDefinition(for: "gemma-4-e2b-it-4bit"))
+        let error = NSError(
+            domain: "Test",
+            code: 1,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Key embed_vision.embedding_projection.weight not found in Gemma4MultiModalEmbedder.Linear"
+            ]
+        )
+
+        let message = Gemma4Plugin.userFacingLoadErrorMessage(for: error, modelDef: model)
+
+        XCTAssertEqual(
+            message,
+            "The downloaded Gemma model cache appears incomplete or incompatible. Delete the cached model and download it again."
+        )
+    }
+
+    func testGemma4CheckpointShapeErrorsUseCacheRecoveryMessage() throws {
+        let model = try XCTUnwrap(Gemma4Plugin.modelDefinition(for: "gemma-4-e4b-it-4bit"))
+        let error = NSError(
+            domain: "Test",
+            code: 1,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Checkpoint tensor shape mismatch for language_model.layers.0.self_attn.q_proj.weight"
+            ]
+        )
+
+        let message = Gemma4Plugin.userFacingLoadErrorMessage(for: error, modelDef: model)
+
+        XCTAssertEqual(
+            message,
+            "The downloaded Gemma model cache appears incomplete or incompatible. Delete the cached model and download it again."
+        )
+    }
+
+    func testGemma4ResetCachedModelDeletesCacheAndClearsLoadedState() async throws {
+        let appSupportDirectory = try TestSupport.makeTemporaryDirectory()
+        defer { TestSupport.remove(appSupportDirectory) }
+
+        let host = MockHostServices(pluginDataDirectory: appSupportDirectory)
+        let plugin = Gemma4Plugin()
+        let model = try XCTUnwrap(Gemma4Plugin.modelDefinition(for: "gemma-4-e2b-it-4bit"))
+        let modelDirectory = appSupportDirectory
+            .appendingPathComponent("models", isDirectory: true)
+            .appendingPathComponent(model.repoId, isDirectory: true)
+        try FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)
+        try Data("partial".utf8).write(to: modelDirectory.appendingPathComponent("model.safetensors"))
+
+        plugin.activate(host: host)
+        try await Task.sleep(nanoseconds: 10_000_000)
+        host.setUserDefault(model.id, forKey: "loadedModel")
+        plugin.beginModelLoad(for: model, isAlreadyDownloaded: true)
+
+        plugin.resetCachedModel(model)
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: modelDirectory.path))
+        XCTAssertNil(host.userDefault(forKey: "loadedModel"))
+        XCTAssertEqual(plugin.modelState, .notLoaded)
+        XCTAssertEqual(plugin.currentDownloadProgress, 0)
+        XCTAssertGreaterThanOrEqual(host.capabilitiesChangedCount, 2)
+    }
+
     func testGemma4ValidatesHuggingFaceTokenAgainstWhoAmIEndpoint() async throws {
         let plugin = Gemma4Plugin()
         let requestRecorder = RequestRecorder()

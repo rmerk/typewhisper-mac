@@ -409,6 +409,16 @@ final class Gemma4Plugin: NSObject, LLMProviderPlugin, LLMTemperatureControllabl
         try? FileManager.default.removeItem(at: repoDir)
     }
 
+    func resetCachedModel(_ modelDef: Gemma4ModelDef) {
+        modelContainer = nil
+        loadedModelId = nil
+        downloadProgress = 0
+        modelState = .notLoaded
+        host?.setUserDefault(nil, forKey: "loadedModel")
+        deleteModelFiles(modelDef)
+        host?.notifyCapabilitiesChanged()
+    }
+
     func restoreLoadedModel(allowDownloads: Bool = true) async {
         guard let savedId = host?.userDefault(forKey: "loadedModel") as? String,
               let modelDef = Self.modelDefinition(for: savedId) else {
@@ -524,12 +534,33 @@ final class Gemma4Plugin: NSObject, LLMProviderPlugin, LLMTemperatureControllabl
         }
 
         let rawMessage = String(describing: error).lowercased()
+        if isRecoverableCacheError(rawMessage) {
+            let bundle = Bundle(for: Gemma4Plugin.self)
+            return String(
+                localized: "The downloaded Gemma model cache appears incomplete or incompatible. Delete the cached model and download it again.",
+                bundle: bundle
+            )
+        }
+
         if rawMessage.contains("unsupported model type")
             || rawMessage.contains("model type gemma4 not supported") {
             return unsupportedModelMessage(for: modelDef)
         }
 
         return error.localizedDescription
+    }
+
+    private static func isRecoverableCacheError(_ rawMessage: String) -> Bool {
+        (rawMessage.contains("key ") && rawMessage.contains(" not found"))
+            || rawMessage.contains("missing key")
+            || rawMessage.contains("missing weight")
+            || rawMessage.contains("shape mismatch")
+            || rawMessage.contains("size mismatch")
+            || (rawMessage.contains("checkpoint")
+                && (rawMessage.contains("not found")
+                    || rawMessage.contains("missing")
+                    || rawMessage.contains("shape")
+                    || rawMessage.contains("mismatch")))
     }
 
     static func promptPrefillStepSize(for modelId: String?) -> Int {
