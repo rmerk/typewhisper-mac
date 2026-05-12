@@ -64,6 +64,7 @@ final class SupertonicPlugin: NSObject, TTSProviderPlugin, PluginSettingsActivit
 
     private let logger = Logger(subsystem: "com.typewhisper.tts.supertonic", category: "Plugin")
     private var host: HostServices?
+    private let synthesizerLock = NSLock()
     private var synthesizer: (any SupertonicSynthesizing)?
     private var downloadProgress = 0.0
     private(set) var modelState: SupertonicModelState = .notDownloaded
@@ -78,7 +79,7 @@ final class SupertonicPlugin: NSObject, TTSProviderPlugin, PluginSettingsActivit
     }
 
     func deactivate() {
-        synthesizer = nil
+        clearSynthesizerCache()
         host = nil
         downloadProgress = 0
         modelState = .notDownloaded
@@ -197,7 +198,7 @@ final class SupertonicPlugin: NSObject, TTSProviderPlugin, PluginSettingsActivit
                     self?.host?.notifyCapabilitiesChanged()
                 }
             }
-            synthesizer = nil
+            clearSynthesizerCache()
             downloadProgress = 1
             modelState = .ready
             host?.notifyCapabilitiesChanged()
@@ -210,7 +211,7 @@ final class SupertonicPlugin: NSObject, TTSProviderPlugin, PluginSettingsActivit
     }
 
     func deleteCachedModel() {
-        synthesizer = nil
+        clearSynthesizerCache()
         modelAssetManager.deleteModelFiles()
         downloadProgress = 0
         modelState = .notDownloaded
@@ -250,12 +251,21 @@ final class SupertonicPlugin: NSObject, TTSProviderPlugin, PluginSettingsActivit
     }
 
     private func synthesizerForCurrentModel() throws -> any SupertonicSynthesizing {
+        synthesizerLock.lock()
+        defer { synthesizerLock.unlock() }
+
         if let synthesizer {
             return synthesizer
         }
         let synthesizer = try SupertonicONNXSynthesizer(modelDirectory: modelAssetManager.modelDirectory)
         self.synthesizer = synthesizer
         return synthesizer
+    }
+
+    private func clearSynthesizerCache() {
+        synthesizerLock.lock()
+        synthesizer = nil
+        synthesizerLock.unlock()
     }
 
     private static func clampedSpeed(_ value: Double) -> Double {
