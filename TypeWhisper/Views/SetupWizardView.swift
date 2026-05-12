@@ -114,57 +114,21 @@ struct SetupWizardView: View {
     // MARK: - Step 0: Welcome
 
     private var welcomeStep: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            Image(nsImage: NSApplication.shared.applicationIconImage)
-                .resizable()
-                .frame(width: 96, height: 96)
-
-            Text(String(localized: "Welcome to TypeWhisper"))
-                .font(.largeTitle.weight(.bold))
-
-            Text(String(localized: "Voice-powered typing for your Mac"))
-                .font(.title3)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 16) {
-                featureHighlight(
-                    icon: "waveform",
-                    title: String(localized: "Speak"),
-                    description: String(localized: "Press a hotkey and talk naturally in any app.")
-                )
-                featureHighlight(
-                    icon: "text.cursor",
-                    title: String(localized: "Type"),
-                    description: String(localized: "Your words appear as text instantly.")
-                )
-                featureHighlight(
-                    icon: "wand.and.stars",
-                    title: String(localized: "Enhance"),
-                    description: String(localized: "AI prompts can rewrite, translate, or summarize.")
-                )
-            }
-            .frame(maxWidth: 380)
-
-            VStack(alignment: .leading, spacing: 10) {
-                Text(String(localized: "What kind of writing do you do most?"))
-                    .font(.headline)
-
-                ForEach(IndustryPreset.allCases) { preset in
-                    industryOption(preset)
+        VStack(spacing: 0) {
+            GeometryReader { proxy in
+                ScrollView {
+                    welcomeContent(twoColumn: proxy.size.width >= 640)
+                        .padding(.horizontal, proxy.size.width >= 520 ? 14 : 28)
+                        .padding(.top, 24)
+                        .padding(.bottom, 14)
+                        .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .top)
                 }
-
-                Text(String(localized: "Industry term packs are prepared during setup and activated automatically when a commercial license is active."))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
-            .frame(maxWidth: 420)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Spacer()
+            Divider()
 
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 Button(String(localized: "Get Started")) {
                     applyIndustrySelection()
                     withAnimation { currentStep = 1 }
@@ -179,30 +143,116 @@ struct SetupWizardView: View {
                 .foregroundStyle(.secondary)
                 .font(.callout)
             }
-            .padding(.bottom, 24)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private func welcomeContent(twoColumn: Bool) -> some View {
+        if twoColumn {
+            VStack(spacing: 16) {
+                welcomeHeader
+
+                HStack(alignment: .top, spacing: 24) {
+                    welcomeFeatureColumn
+                        .frame(width: 230, alignment: .leading)
+                    industryPresetColumn
+                        .frame(width: 360, alignment: .leading)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+        } else {
+            VStack(spacing: 16) {
+                welcomeHeader
+                welcomeFeatureColumn
+                industryPresetColumn
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var welcomeHeader: some View {
+        HStack(spacing: 12) {
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .frame(width: 68, height: 68)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(String(localized: "Welcome to TypeWhisper"))
+                    .font(.title.weight(.bold))
+                    .lineLimit(1)
+
+                Text(String(localized: "Voice-powered typing for your Mac"))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private var welcomeFeatureColumn: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            featureHighlight(
+                icon: "waveform",
+                title: String(localized: "Speak"),
+                description: String(localized: "Press a hotkey and talk naturally in any app.")
+            )
+            featureHighlight(
+                icon: "text.cursor",
+                title: String(localized: "Type"),
+                description: String(localized: "Your words appear as text instantly.")
+            )
+            featureHighlight(
+                icon: "wand.and.stars",
+                title: String(localized: "Enhance"),
+                description: String(localized: "AI prompts can rewrite, translate, or summarize.")
+            )
+        }
+        .frame(maxWidth: 230, alignment: .leading)
+    }
+
+    private var industryPresetColumn: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "What kind of writing do you do most?"))
+                .font(.title3.weight(.semibold))
+
+            ForEach(IndustryPreset.allCases) { preset in
+                industryOption(preset)
+            }
+
+            Text(String(localized: "Industry term packs are prepared during setup and activated automatically when a commercial license is active."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: 360, alignment: .leading)
     }
 
     private func industryOption(_ preset: IndustryPreset) -> some View {
         let isSelected = selectedIndustryPreset == preset
 
-        return HStack(spacing: 12) {
+        return HStack(spacing: 10) {
             Image(systemName: isSelected ? "largecircle.fill.circle" : preset.systemImage)
+                .font(.callout)
                 .foregroundStyle(isSelected ? Color.accentColor : .secondary)
-                .frame(width: 24)
+                .frame(width: 22)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(preset.displayName)
-                    .font(.body.weight(.medium))
+                    .font(.headline)
                 Text(preset.description)
-                    .font(.caption)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
 
             Spacer()
         }
-        .padding(10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 9)
         .background(RoundedRectangle(cornerRadius: 8).fill(isSelected ? Color.accentColor.opacity(0.08) : Color.secondary.opacity(0.08)))
         .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(isSelected ? Color.accentColor.opacity(0.35) : Color.clear, lineWidth: 1))
         .contentShape(Rectangle())
@@ -216,19 +266,20 @@ struct SetupWizardView: View {
     }
 
     private func featureHighlight(icon: String, title: String, description: String) -> some View {
-        HStack(spacing: 14) {
+        HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
-                .font(.title2)
+                .font(.title3)
                 .foregroundStyle(.blue)
-                .frame(width: 36, height: 36)
+                .frame(width: 24)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.headline)
                 Text(description)
                     .font(.callout)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
         }
     }

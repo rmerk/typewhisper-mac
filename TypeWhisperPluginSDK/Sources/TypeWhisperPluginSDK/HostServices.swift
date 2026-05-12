@@ -259,14 +259,13 @@ public enum PluginTranscriptionError: LocalizedError, Sendable {
 public struct PluginOpenAITranscriptionHelper: Sendable {
     public let baseURL: String
     public let responseFormat: String
-    private let requestTimeout: TimeInterval
+    private static let defaultRequestTimeout: TimeInterval = 30
     static let minimumUploadDuration: TimeInterval = 1.0
     static let uploadSampleRate = 16000
 
-    public init(baseURL: String, responseFormat: String = "verbose_json", requestTimeout: TimeInterval = 30) {
+    public init(baseURL: String, responseFormat: String = "verbose_json") {
         self.baseURL = baseURL
         self.responseFormat = responseFormat
-        self.requestTimeout = requestTimeout
     }
 
     func normalizedAudioForUpload(_ audio: AudioData) -> AudioData {
@@ -294,6 +293,50 @@ public struct PluginOpenAITranscriptionHelper: Sendable {
         translate: Bool,
         prompt: String?,
         responseFormat: String? = nil
+    ) async throws -> PluginTranscriptionResult {
+        try await performTranscribe(
+            audio: audio,
+            apiKey: apiKey,
+            modelName: modelName,
+            language: language,
+            translate: translate,
+            prompt: prompt,
+            responseFormat: responseFormat,
+            requestTimeout: Self.defaultRequestTimeout
+        )
+    }
+
+    public func transcribe(
+        audio: AudioData,
+        apiKey: String,
+        modelName: String,
+        language: String?,
+        translate: Bool,
+        prompt: String?,
+        requestTimeout: TimeInterval,
+        responseFormat: String? = nil
+    ) async throws -> PluginTranscriptionResult {
+        try await performTranscribe(
+            audio: audio,
+            apiKey: apiKey,
+            modelName: modelName,
+            language: language,
+            translate: translate,
+            prompt: prompt,
+            responseFormat: responseFormat,
+            requestTimeout: requestTimeout
+        )
+    }
+
+    private func performTranscribe(
+        audio: AudioData,
+        apiKey: String,
+        modelName: String,
+        language: String?,
+        translate: Bool,
+        prompt: String?,
+        responseFormat: String?,
+        requestTimeout: TimeInterval
     ) async throws -> PluginTranscriptionResult {
         let endpoint: String
         if translate {

@@ -47,11 +47,7 @@ final class OpenAICompatiblePlugin: NSObject, TranscriptionEnginePlugin, Diction
 
     private func makeTranscriptionHelper() -> PluginOpenAITranscriptionHelper? {
         guard let baseURL = _baseURL, !baseURL.isEmpty else { return nil }
-        return PluginOpenAITranscriptionHelper(
-            baseURL: baseURL,
-            responseFormat: "json",
-            requestTimeout: Self.transcriptionRequestTimeout
-        )
+        return PluginOpenAITranscriptionHelper(baseURL: baseURL, responseFormat: "json")
     }
 
     private func makeChatHelper() -> PluginOpenAIChatHelper? {
@@ -117,7 +113,8 @@ final class OpenAICompatiblePlugin: NSObject, TranscriptionEnginePlugin, Diction
             modelName: modelId,
             language: language,
             translate: translate,
-            prompt: prompt
+            prompt: prompt,
+            requestTimeout: Self.transcriptionRequestTimeout
         )
     }
 
